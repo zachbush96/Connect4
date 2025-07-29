@@ -4,6 +4,7 @@ import { getGame, updateGame } from '../create/route'
 export async function POST(request: NextRequest) {
   try {
     const { gameId, playerId, row, col } = await request.json()
+    console.log('[POST /api/game/move] incoming', { gameId, playerId, row, col })
 
     if (!gameId || !playerId || row === undefined || col === undefined) {
       return NextResponse.json(
@@ -73,12 +74,14 @@ export async function POST(request: NextRequest) {
 
     updateGame(gameId, updatedGame)
 
+    console.log('[POST /api/game/move] move processed', { gameId, row, col, winner, isDraw })
+
     return NextResponse.json({
       success: true,
       game: updatedGame,
     })
   } catch (error) {
-    console.error('Error making move:', error)
+    console.error('[POST /api/game/move] error', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

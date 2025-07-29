@@ -4,6 +4,11 @@ import { getGame, updateGame } from '../create/route'
 export async function POST(request: NextRequest) {
   try {
     const { playerName, playerColor, gameId } = await request.json()
+    console.log('[POST /api/game/join] incoming', {
+      playerName,
+      playerColor,
+      gameId,
+    })
 
     if (!playerName || !playerColor || !gameId) {
       return NextResponse.json(
@@ -52,12 +57,17 @@ export async function POST(request: NextRequest) {
 
     updateGame(gameId, updatedGame)
 
+    console.log('[POST /api/game/join] player joined', {
+      gameId,
+      playerId,
+    })
+
     return NextResponse.json({
       success: true,
       game: updatedGame,
     })
   } catch (error) {
-    console.error('Error joining game:', error)
+    console.error('[POST /api/game/join] error', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

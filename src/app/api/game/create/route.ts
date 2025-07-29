@@ -7,6 +7,11 @@ const games = new Map<string, any>()
 export async function POST(request: NextRequest) {
   try {
     const { playerName, playerColor, boardSize } = await request.json()
+    console.log('[POST /api/game/create] incoming', {
+      playerName,
+      playerColor,
+      boardSize,
+    })
 
     if (!playerName || !playerColor || !boardSize) {
       return NextResponse.json(
@@ -42,12 +47,14 @@ export async function POST(request: NextRequest) {
 
     games.set(gameId, game)
 
+    console.log('[POST /api/game/create] game created', { gameId })
+
     return NextResponse.json({
       success: true,
       game,
     })
   } catch (error) {
-    console.error('Error creating game:', error)
+    console.error('[POST /api/game/create] error', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
