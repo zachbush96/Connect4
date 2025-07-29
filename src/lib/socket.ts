@@ -16,7 +16,12 @@ export const setupSocket = (io: Server) => {
         socket.emit('game-state', game);
         // notify other players in the room that a player joined
         socket.to(`game-${gameId}`).emit('game-updated', game);
+        console.log('broadcasted game-updated on join-game event', {
+          gameId,
+          players: game.players.map(p => p.id),
+        });
       }
+    
     });
 
     // Handle making a move
@@ -77,9 +82,13 @@ export const setupSocket = (io: Server) => {
 
       // Broadcast the updated game state to all players in the game
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
-      console.log('game state updated', { gameId, winner, isDraw });
+    console.log('game state updated', {
+      gameId,
+      winner,
+      isDraw,
+      players: updatedGame.players.map(p => p.id),
     });
-
+    });
     // Handle leaving a game room
     socket.on('leave-game', (gameId: string) => {
       socket.leave(`game-${gameId}`);
@@ -101,6 +110,11 @@ export const setupSocket = (io: Server) => {
           const game = getGame(message.gameId);
           if (game) {
             socket.emit('game-state', game);
+            socket.to(`game-${message.gameId}`).emit('game-updated', game);
+            console.log('broadcasted game-updated after join', {
+              gameId: message.gameId,
+              players: game.players.map(p => p.id),
+            });
           }
         } else if (message.type === 'make-move') {
           // Handle make-move message
@@ -179,6 +193,8 @@ export const setupSocket = (io: Server) => {
     });
   });
 };
+
+
 
 function checkWinner(board: string[][], playerId: string, row: number, col: number, boardSize: number): string | null {
   // Check horizontal
