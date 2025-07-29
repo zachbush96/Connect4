@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react'
+import { io, type Socket } from 'socket.io-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -55,7 +56,7 @@ export default function Connect4() {
   const [isJoining, setIsJoining] = useState(false)
   const [gameIdInput, setGameIdInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [socket, setSocket] = useState<any>(null)
+  const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   
   const { toast } = useToast()
@@ -71,72 +72,56 @@ export default function Connect4() {
   }, [])
 
   useEffect(() => {
-    // Initialize WebSocket connection
     if (typeof window !== 'undefined') {
-      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-      const wsUrl = `${protocol}://${window.location.host}/api/socketio`
-      console.log('connecting to websocket', wsUrl)
-      const ws = new WebSocket(wsUrl)
-      
-      ws.onopen = () => {
+      const socketInstance: Socket = io({
+        path: '/api/socketio',
+      })
+
+      setSocket(socketInstance)
+
+      socketInstance.on('connect', () => {
         console.log('WebSocket connected')
         setIsConnected(true)
-        setSocket(ws)
-      }
-      
-      ws.onmessage = (event) => {
-        console.log('WebSocket message', event.data)
-        const data = JSON.parse(event.data)
-        
-        if (data.type === 'game-state' || data.type === 'game-updated') {
-          setGameState(prev => ({
-            ...prev,
-            board: data.board,
-            currentPlayer: data.currentPlayer,
-            players: data.players,
-            winner: data.winner,
-            isDraw: data.isDraw,
-            boardSize: data.boardSize,
-          }))
-        }
-        
-        if (data.type === 'error') {
-          toast({
-            title: "Error",
-            description: data.message,
-            variant: "destructive",
-          })
-        }
-      }
-      
-      ws.onclose = (event) => {
-        console.log('WebSocket disconnected', event)
+      })
+
+      socketInstance.on('disconnect', () => {
+        console.log('WebSocket disconnected')
         setIsConnected(false)
-        setSocket(null)
+      })
+
+      const handleGameUpdate = (data: any) => {
+        setGameState(prev => ({
+          ...prev,
+          board: data.board,
+          currentPlayer: data.currentPlayer,
+          players: data.players,
+          winner: data.winner,
+          isDraw: data.isDraw,
+          boardSize: data.boardSize,
+        }))
       }
-      
-      ws.onerror = (error) => {
-        console.error('WebSocket error', error)
-        setIsConnected(false)
-      }
-      
+
+      socketInstance.on('game-state', handleGameUpdate)
+      socketInstance.on('game-updated', handleGameUpdate)
+
+      socketInstance.on('error', (err: any) => {
+        toast({
+          title: 'Error',
+          description: err.message,
+          variant: 'destructive',
+        })
+      })
+
       return () => {
-        if (ws.readyState === WebSocket.OPEN) {
-          console.log('closing WebSocket connection')
-          ws.close()
-        }
+        socketInstance.disconnect()
       }
     }
   }, [toast])
 
   useEffect(() => {
-    // Join game room when game starts
-    if (socket && socket.readyState === WebSocket.OPEN && gameState.gameId && !isConfiguring) {
+    if (socket && (socket as any).connected && gameState.gameId && !isConfiguring) {
       console.log('joining game room', gameState.gameId)
-      socket.send(JSON.stringify({
-        type: 'join-game',
-        gameId: gameState.gameId
-      }))
+      ;(socket as Socket).emit('join-game', gameState.gameId)
     }
   }, [socket, gameState.gameId, isConfiguring])
 
@@ -302,15 +287,13 @@ export default function Connect4() {
 
     if (row === -1) return // Column is full
 
-    // Send move via WebSocket
     console.log('sending move', { row, col })
-    socket.send(JSON.stringify({
-      type: 'make-move',
+    ;(socket as Socket).emit('make-move', {
       gameId: gameState.gameId,
       playerId: currentPlayerObj.id,
       row,
       col,
-    }))
+    })
   }
 
   const shareGame = () => {
