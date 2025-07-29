@@ -33,6 +33,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Ensure chosen color is not already taken
+    const colorTaken = game.players.some((p: any) => p.color === playerColor)
+    if (colorTaken) {
+      return NextResponse.json(
+        { success: false, error: 'Color already taken' },
+        { status: 400 }
+      )
+    }
+
     // Check if player already exists in game
     const existingPlayer = game.players.find((p: any) => p.name === playerName)
     if (existingPlayer) {

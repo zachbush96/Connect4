@@ -52,6 +52,7 @@ export default function Connect4() {
   
   const [playerName, setPlayerName] = useState('')
   const [playerColor, setPlayerColor] = useState(COLORS[0])
+  const [takenColors, setTakenColors] = useState<string[]>([])
   const [isConfiguring, setIsConfiguring] = useState(true)
   const [isJoining, setIsJoining] = useState(false)
   const [gameIdInput, setGameIdInput] = useState('')
@@ -71,6 +72,26 @@ export default function Connect4() {
       setIsJoining(true)
     }
   }, [])
+
+  // Fetch game details to determine taken colors when joining
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!gameIdInput) return
+      try {
+        const res = await fetch(`/api/game/details?gameId=${gameIdInput}`)
+        const data = await res.json()
+        if (data.success) {
+          const colors = (data.game.players as Player[]).map(p => p.color)
+          setTakenColors(colors)
+        }
+      } catch (err) {
+        console.error('fetch game details error', err)
+      }
+    }
+    if (isJoining) {
+      fetchDetails()
+    }
+  }, [gameIdInput, isJoining])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -209,6 +230,15 @@ export default function Connect4() {
       toast({
         title: "Error",
         description: "Please enter your name and game ID",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (takenColors.includes(playerColor)) {
+      toast({
+        title: "Color Taken",
+        description: "Please choose a different color",
         variant: "destructive",
       })
       return
@@ -382,9 +412,10 @@ export default function Connect4() {
                     key={color}
                     className={`w-8 h-8 rounded-full border-2 ${
                       playerColor === color ? 'border-black' : 'border-gray-300'
-                    }`}
+                    } ${takenColors.includes(color) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     style={{ backgroundColor: color }}
-                    onClick={() => setPlayerColor(color)}
+                    onClick={() => !takenColors.includes(color) && setPlayerColor(color)}
+                    disabled={takenColors.includes(color)}
                   />
                 ))}
               </div>
