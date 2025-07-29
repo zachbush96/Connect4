@@ -73,7 +73,8 @@ export default function Connect4() {
   useEffect(() => {
     // Initialize WebSocket connection
     if (typeof window !== 'undefined') {
-      const ws = new WebSocket('ws://localhost:3000/api/socketio')
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
+      const ws = new WebSocket(`${protocol}://${window.location.host}/api/socketio`)
       
       ws.onopen = () => {
         console.log('WebSocket connected')
