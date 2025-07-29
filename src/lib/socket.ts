@@ -9,11 +9,13 @@ export const setupSocket = (io: Server) => {
     socket.on('join-game', (gameId: string) => {
       socket.join(`game-${gameId}`);
       console.log(`Client ${socket.id} joined game ${gameId}`);
-      
+
       // Send current game state to the client
       const game = getGame(gameId);
       if (game) {
         socket.emit('game-state', game);
+        // notify other players in the room that a player joined
+        socket.to(`game-${gameId}`).emit('game-updated', game);
       }
     });
 
