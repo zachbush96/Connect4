@@ -20,6 +20,7 @@ export const setupSocket = (io: Server) => {
     // Handle making a move
     socket.on('make-move', (data: { gameId: string; playerId: string; row: number; col: number }) => {
       const { gameId, playerId, row, col } = data;
+      console.log('make-move received', { gameId, playerId, row, col });
       
       // Get the current game state
       const game = getGame(gameId);
@@ -74,6 +75,7 @@ export const setupSocket = (io: Server) => {
 
       // Broadcast the updated game state to all players in the game
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
+      console.log('game state updated', { gameId, winner, isDraw });
     });
 
     // Handle leaving a game room
@@ -86,6 +88,7 @@ export const setupSocket = (io: Server) => {
     socket.on('message', (data) => {
       try {
         const message = typeof data === 'string' ? JSON.parse(data) : data;
+        console.log('raw message received', message);
         
         if (message.type === 'join-game') {
           // Handle join-game message
@@ -154,6 +157,7 @@ export const setupSocket = (io: Server) => {
 
           // Broadcast the updated game state to all players in the game
           io.to(`game-${gameId}`).emit('game-updated', updatedGame);
+          console.log('game state updated', { gameId, winner, isDraw });
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);

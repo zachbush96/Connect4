@@ -74,7 +74,9 @@ export default function Connect4() {
     // Initialize WebSocket connection
     if (typeof window !== 'undefined') {
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-      const ws = new WebSocket(`${protocol}://${window.location.host}/api/socketio`)
+      const wsUrl = `${protocol}://${window.location.host}/api/socketio`
+      console.log('connecting to websocket', wsUrl)
+      const ws = new WebSocket(wsUrl)
       
       ws.onopen = () => {
         console.log('WebSocket connected')
@@ -83,6 +85,7 @@ export default function Connect4() {
       }
       
       ws.onmessage = (event) => {
+        console.log('WebSocket message', event.data)
         const data = JSON.parse(event.data)
         
         if (data.type === 'game-state' || data.type === 'game-updated') {
@@ -106,19 +109,20 @@ export default function Connect4() {
         }
       }
       
-      ws.onclose = () => {
-        console.log('WebSocket disconnected')
+      ws.onclose = (event) => {
+        console.log('WebSocket disconnected', event)
         setIsConnected(false)
         setSocket(null)
       }
       
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error)
+        console.error('WebSocket error', error)
         setIsConnected(false)
       }
       
       return () => {
         if (ws.readyState === WebSocket.OPEN) {
+          console.log('closing WebSocket connection')
           ws.close()
         }
       }
@@ -128,6 +132,7 @@ export default function Connect4() {
   useEffect(() => {
     // Join game room when game starts
     if (socket && socket.readyState === WebSocket.OPEN && gameState.gameId && !isConfiguring) {
+      console.log('joining game room', gameState.gameId)
       socket.send(JSON.stringify({
         type: 'join-game',
         gameId: gameState.gameId
@@ -151,6 +156,11 @@ export default function Connect4() {
 
     setIsLoading(true)
     try {
+      console.log('creating game', {
+        playerName,
+        playerColor,
+        boardSize: gameState.boardSize,
+      })
       const response = await fetch('/api/game/create', {
         method: 'POST',
         headers: {
@@ -164,6 +174,8 @@ export default function Connect4() {
       })
 
       const data = await response.json()
+      console.log('joinGame response', data)
+      console.log('createGame response', data)
       
       if (data.success) {
         setGameState({
@@ -194,6 +206,7 @@ export default function Connect4() {
         })
       }
     } catch (error) {
+      console.error('createGame error', error)
       toast({
         title: "Error",
         description: "Failed to create game",
@@ -216,6 +229,11 @@ export default function Connect4() {
 
     setIsLoading(true)
     try {
+      console.log('joining game', {
+        playerName,
+        playerColor,
+        gameId: gameIdInput,
+      })
       const response = await fetch('/api/game/join', {
         method: 'POST',
         headers: {
@@ -254,12 +272,13 @@ export default function Connect4() {
           variant: "destructive",
         })
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to join game",
-        variant: "destructive",
-      })
+  } catch (error) {
+    console.error('joinGame error', error)
+    toast({
+      title: "Error",
+      description: "Failed to join game",
+      variant: "destructive",
+    })
     } finally {
       setIsLoading(false)
     }
@@ -284,6 +303,7 @@ export default function Connect4() {
     if (row === -1) return // Column is full
 
     // Send move via WebSocket
+    console.log('sending move', { row, col })
     socket.send(JSON.stringify({
       type: 'make-move',
       gameId: gameState.gameId,
@@ -295,8 +315,9 @@ export default function Connect4() {
 
   const shareGame = () => {
     if (!gameState.gameId) return
-    
+
     const url = `${window.location.origin}?game=${gameState.gameId}`
+    console.log('share link copied', url)
     navigator.clipboard.writeText(url)
     toast({
       title: "Link Copied!",
@@ -305,6 +326,7 @@ export default function Connect4() {
   }
 
   const resetGame = () => {
+    console.log('resetting game')
     setIsConfiguring(true)
     setIsJoining(false)
     setGameState({
