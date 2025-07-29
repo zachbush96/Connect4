@@ -58,6 +58,7 @@ export default function Connect4() {
   const [isLoading, setIsLoading] = useState(false)
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
   
   const { toast } = useToast()
 
@@ -172,6 +173,7 @@ export default function Connect4() {
           boardSize: gameState.boardSize,
           gameId: data.game.id,
         })
+        setMyPlayerId(data.game.players[0].id)
         setIsConfiguring(false)
         
         // Update URL with game ID
@@ -243,6 +245,12 @@ export default function Connect4() {
           boardSize: data.game.boardSize,
           gameId: data.game.id,
         })
+        const joinedPlayer = data.game.players.find(
+          (p: Player) => p.name === playerName && p.color === playerColor
+        )
+        if (joinedPlayer) {
+          setMyPlayerId(joinedPlayer.id)
+        }
         setIsConfiguring(false)
         setIsJoining(false)
         
@@ -272,8 +280,14 @@ export default function Connect4() {
   const makeMove = async (col: number) => {
     if (gameState.winner || gameState.isDraw || !gameState.gameId || !socket) return
 
-    const currentPlayerObj = gameState.players.find(p => p.id === gameState.currentPlayer)
-    if (!currentPlayerObj) return
+    if (!myPlayerId || myPlayerId !== gameState.currentPlayer) {
+      toast({
+        title: "Not your turn",
+        description: "Please wait for your turn.",
+        variant: "destructive",
+      })
+      return
+    }
 
     // Find the first empty row in the column
     const newBoard = [...gameState.board]
@@ -290,7 +304,7 @@ export default function Connect4() {
     console.log('sending move', { row, col })
     ;(socket as Socket).emit('make-move', {
       gameId: gameState.gameId,
-      playerId: currentPlayerObj.id,
+      playerId: myPlayerId,
       row,
       col,
     })
@@ -312,6 +326,7 @@ export default function Connect4() {
     console.log('resetting game')
     setIsConfiguring(true)
     setIsJoining(false)
+    setMyPlayerId(null)
     setGameState({
       board: [],
       currentPlayer: '',
@@ -522,7 +537,7 @@ export default function Connect4() {
                         key={colIndex}
                         className="w-12 h-12 bg-white border-2 border-gray-300 rounded-full m-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => makeMove(colIndex)}
-                        disabled={!!gameState.winner || gameState.isDraw}
+                        disabled={!!gameState.winner || gameState.isDraw || myPlayerId !== gameState.currentPlayer}
                       >
                         {cell && (
                           <div
