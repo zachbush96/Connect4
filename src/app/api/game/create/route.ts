@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-
-// Game storage in memory (in production, you'd use a database)
-const games = new Map<string, any>()
+import { games } from '@/lib/game-store'
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,12 +60,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to get game (exported for use in other routes)
-export function getGame(gameId: string) {
-  return games.get(gameId)
-}
-
-// Helper function to update game (exported for use in other routes)
-export function updateGame(gameId: string, gameData: any) {
-  games.set(gameId, { ...gameData, updatedAt: new Date().toISOString() })
-}
+// Game utility functions are provided by '@/lib/game-store'

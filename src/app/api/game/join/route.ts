@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getGame, updateGame } from '../create/route'
+import { getGame, updateGame } from '@/lib/game-store'
 
 export async function POST(request: NextRequest) {
   try {
