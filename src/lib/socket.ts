@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { getGame, updateGame } from '@/app/api/game/create/route';
+import { getGame, updateGame } from '@/lib/game-store';
 
 export const setupSocket = (io: Server) => {
   io.on('connection', (socket) => {
