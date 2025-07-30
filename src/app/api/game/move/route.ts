@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGame, updateGame } from '@/lib/game-store'
+import { BLOCKED_CELL } from '@/lib/constants'
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
     const winner = checkWinner(newBoard, playerId, row, col, game.boardSize)
     
     // Check for draw
-    const isDraw = !winner && newBoard.flat().every(cell => cell !== '')
+    const isDraw = !winner && newBoard.flat().every(cell => cell !== '' && cell !== BLOCKED_CELL)
 
     // Determine next player
     const nextPlayer = game.players.find((p: any) => p.id !== playerId)?.id || playerId

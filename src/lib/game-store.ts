@@ -11,6 +11,7 @@ export interface Game {
   players: Player[]
   winner: string | null
   isDraw: boolean
+  blocksUsed: Record<string, boolean>
   boardSize: number
   createdAt: string
   updatedAt: string

@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { getGame, updateGame } from '@/lib/game-store';
+import { BLOCKED_CELL } from '@/lib/constants';
 
 export const setupSocket = (io: Server) => {
   io.on('connection', (socket) => {
@@ -65,7 +66,7 @@ export const setupSocket = (io: Server) => {
       const winner = checkWinner(newBoard, playerId, row, col, game.boardSize);
       
       // Check for draw
-      const isDraw = !winner && newBoard.flat().every(cell => cell !== '');
+      const isDraw = !winner && newBoard.flat().every(cell => cell !== '' && cell !== BLOCKED_CELL);
 
       // Determine next player
       const nextPlayer = game.players.find((p: any) => p.id !== playerId)?.id || playerId;
@@ -87,6 +88,55 @@ export const setupSocket = (io: Server) => {
       winner,
       isDraw,
       players: updatedGame.players.map(p => p.id),
+    });
+
+    // Handle placing a block
+    socket.on('place-block', (data: { gameId: string; playerId: string; row: number; col: number }) => {
+      const { gameId, playerId, row, col } = data;
+      console.log('place-block received', { gameId, playerId, row, col });
+
+      const game = getGame(gameId);
+      if (!game) {
+        socket.emit('error', { message: 'Game not found' });
+        return;
+      }
+
+      if (game.winner || game.isDraw) {
+        socket.emit('error', { message: 'Game is already finished' });
+        return;
+      }
+
+      if (game.blocksUsed[playerId]) {
+        socket.emit('error', { message: 'Block already used' });
+        return;
+      }
+
+      if (row < 0 || row >= game.boardSize || col < 0 || col >= game.boardSize) {
+        socket.emit('error', { message: 'Invalid block position' });
+        return;
+      }
+
+      if (game.board[row][col] !== '') {
+        socket.emit('error', { message: 'Position already occupied' });
+        return;
+      }
+
+      const newBoard = game.board.map((r: string[]) => [...r]);
+      newBoard[row][col] = BLOCKED_CELL;
+
+      const isDraw = !game.winner && newBoard.flat().every(cell => cell !== '' && cell !== BLOCKED_CELL);
+
+      const updatedGame = {
+        ...game,
+        board: newBoard,
+        blocksUsed: { ...game.blocksUsed, [playerId]: true },
+        isDraw,
+      };
+
+      updateGame(gameId, updatedGame);
+
+      io.to(`game-${gameId}`).emit('game-updated', updatedGame);
+      console.log('block placed', { gameId, row, col });
     });
     });
     // Handle leaving a game room
@@ -156,7 +206,7 @@ export const setupSocket = (io: Server) => {
           const winner = checkWinner(newBoard, playerId, row, col, game.boardSize);
           
           // Check for draw
-          const isDraw = !winner && newBoard.flat().every(cell => cell !== '');
+          const isDraw = !winner && newBoard.flat().every(cell => cell !== '' && cell !== BLOCKED_CELL);
 
           // Determine next player
           const nextPlayer = game.players.find((p: any) => p.id !== playerId)?.id || playerId;
@@ -174,6 +224,51 @@ export const setupSocket = (io: Server) => {
           // Broadcast the updated game state to all players in the game
           io.to(`game-${gameId}`).emit('game-updated', updatedGame);
           console.log('game state updated', { gameId, winner, isDraw });
+        } else if (message.type === 'place-block') {
+          const { gameId, playerId, row, col } = message;
+
+          const game = getGame(gameId);
+          if (!game) {
+            socket.emit('error', { message: 'Game not found' });
+            return;
+          }
+
+          if (game.winner || game.isDraw) {
+            socket.emit('error', { message: 'Game is already finished' });
+            return;
+          }
+
+          if (game.blocksUsed[playerId]) {
+            socket.emit('error', { message: 'Block already used' });
+            return;
+          }
+
+          if (row < 0 || row >= game.boardSize || col < 0 || col >= game.boardSize) {
+            socket.emit('error', { message: 'Invalid block position' });
+            return;
+          }
+
+          if (game.board[row][col] !== '') {
+            socket.emit('error', { message: 'Position already occupied' });
+            return;
+          }
+
+          const newBoard = game.board.map((r: string[]) => [...r]);
+          newBoard[row][col] = BLOCKED_CELL;
+
+          const isDraw = !game.winner && newBoard.flat().every(cell => cell !== '' && cell !== BLOCKED_CELL);
+
+          const updatedGame = {
+            ...game,
+            board: newBoard,
+            blocksUsed: { ...game.blocksUsed, [playerId]: true },
+            isDraw,
+          };
+
+          updateGame(gameId, updatedGame);
+
+          io.to(`game-${gameId}`).emit('game-updated', updatedGame);
+          console.log('block placed', { gameId, row, col });
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
