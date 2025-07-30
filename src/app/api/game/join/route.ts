@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
     const updatedGame = {
       ...game,
       players: [...game.players, newPlayer],
+      blocksUsed: { ...game.blocksUsed, [playerId]: false },
     }
 
     updateGame(gameId, updatedGame)

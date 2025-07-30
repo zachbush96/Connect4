@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
 import { games } from '@/lib/game-store'
 
 export async function POST(request: NextRequest) {
@@ -38,6 +37,7 @@ export async function POST(request: NextRequest) {
       ],
       winner: null,
       isDraw: false,
+      blocksUsed: { [playerId]: false },
       boardSize,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { Copy, Share2, Users, Settings } from 'lucide-react'
+import { BLOCKED_CELL } from '@/lib/constants'
 
 interface Player {
   id: string
@@ -24,6 +25,7 @@ interface GameState {
   players: Player[]
   winner: string | null
   isDraw: boolean
+  blocksUsed: Record<string, boolean>
   boardSize: number
   gameId: string | null
 }
@@ -46,6 +48,7 @@ export default function Connect4() {
     players: [],
     winner: null,
     isDraw: false,
+    blocksUsed: {},
     boardSize: 7,
     gameId: null,
   })
@@ -59,6 +62,7 @@ export default function Connect4() {
   const [isLoading, setIsLoading] = useState(false)
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [isBlocking, setIsBlocking] = useState(false)
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
   
   const { toast } = useToast()
@@ -120,6 +124,7 @@ export default function Connect4() {
           winner: data.winner,
           isDraw: data.isDraw,
           boardSize: data.boardSize,
+          blocksUsed: data.blocksUsed,
         }))
       }
 
@@ -191,6 +196,7 @@ export default function Connect4() {
           players: data.game.players,
           winner: null,
           isDraw: false,
+          blocksUsed: data.game.blocksUsed,
           boardSize: gameState.boardSize,
           gameId: data.game.id,
         })
@@ -272,6 +278,7 @@ export default function Connect4() {
           players: data.game.players,
           winner: data.game.winner,
           isDraw: data.game.isDraw,
+          blocksUsed: data.game.blocksUsed,
           boardSize: data.game.boardSize,
           gameId: data.game.id,
         })
@@ -340,6 +347,19 @@ export default function Connect4() {
     })
   }
 
+  const placeBlock = (row: number, col: number) => {
+    if (!socket || !gameState.gameId || !myPlayerId) return
+    if (gameState.blocksUsed[myPlayerId]) return
+    console.log('sending block', { row, col })
+    ;(socket as Socket).emit('place-block', {
+      gameId: gameState.gameId,
+      playerId: myPlayerId,
+      row,
+      col,
+    })
+    setIsBlocking(false)
+  }
+
   const shareGame = () => {
     if (!gameState.gameId) return
 
@@ -363,6 +383,7 @@ export default function Connect4() {
       players: [],
       winner: null,
       isDraw: false,
+      blocksUsed: {},
       boardSize: 7,
       gameId: null,
     })
@@ -516,6 +537,14 @@ export default function Connect4() {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setIsBlocking(b => !b)}
+                disabled={!!gameState.blocksUsed[myPlayerId ?? ''] || !!gameState.winner || gameState.isDraw}
+              >
+                {isBlocking ? 'Cancel Block' : 'Place Block'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={resetGame}
               >
                 New Game
@@ -567,14 +596,22 @@ export default function Connect4() {
                       <button
                         key={colIndex}
                         className="w-12 h-12 bg-white border-2 border-gray-300 rounded-full m-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => makeMove(colIndex)}
-                        disabled={!!gameState.winner || gameState.isDraw || myPlayerId !== gameState.currentPlayer}
+                        onClick={() => isBlocking ? placeBlock(rowIndex, colIndex) : makeMove(colIndex)}
+                        disabled={
+                          isBlocking
+                            ? !!gameState.winner || gameState.isDraw || !!gameState.blocksUsed[myPlayerId ?? ''] || gameState.board[rowIndex][colIndex] !== ''
+                            : !!gameState.winner || gameState.isDraw || myPlayerId !== gameState.currentPlayer
+                        }
                       >
-                        {cell && (
-                          <div
-                            className="w-10 h-10 rounded-full"
-                            style={{ backgroundColor: getPlayerColor(cell) }}
-                          />
+                        {cell === BLOCKED_CELL ? (
+                          <span className="text-xl font-bold">X</span>
+                        ) : (
+                          cell && (
+                            <div
+                              className="w-10 h-10 rounded-full"
+                              style={{ backgroundColor: getPlayerColor(cell) }}
+                            />
+                          )
                         )}
                       </button>
                     ))}
