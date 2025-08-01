@@ -6,12 +6,12 @@ import { addGameEvent } from '@/lib/game-log-store';
 
 export const setupSocket = (io: Server) => {
   io.on('connection', (socket) => {
-    //console.log('Client connected:', socket.id);
+    console.log('Client connected:', socket.id);
     
     // Handle joining a game room
     socket.on('join-game', (gameId: string) => {
       socket.join(`game-${gameId}`);
-      //console.log(`Client ${socket.id} joined game ${gameId}`);
+      console.log(`Client ${socket.id} joined game ${gameId}`);
 
       // Send current game state to the client
       const game = getGame(gameId);
@@ -19,7 +19,7 @@ export const setupSocket = (io: Server) => {
         socket.emit('game-state', game);
         // notify other players in the room that a player joined
         socket.to(`game-${gameId}`).emit('game-updated', game);
-        //console.log('broadcasted game-updated on join-game event', {
+        console.log('broadcasted game-updated on join-game event', {
           gameId,
           players: game.players.map(p => p.id),
         });
@@ -30,7 +30,7 @@ export const setupSocket = (io: Server) => {
     // Handle making a move
     socket.on('make-move', (data: { gameId: string; playerId: string; row: number; col: number }) => {
       const { gameId, playerId, row, col } = data;
-      //console.log('make-move received', { gameId, playerId, row, col });
+      console.log('make-move received', { gameId, playerId, row, col });
       
       // Get the current game state
       const game = getGame(gameId);
@@ -101,17 +101,17 @@ export const setupSocket = (io: Server) => {
 
       // Broadcast the updated game state to all players in the game
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
-    //console.log('game state updated', {
+    console.log('game state updated', {
       gameId,
       winner,
       isDraw,
       players: updatedGame.players.map(p => p.id),
-    });
+      });
 
     // Handle placing a block
     socket.on('place-block', (data: { gameId: string; playerId: string; row: number; col: number }) => {
       const { gameId, playerId, row, col } = data;
-      //console.log('place-block received', { gameId, playerId, row, col });
+      console.log('place-block received', { gameId, playerId, row, col });
 
       const game = getGame(gameId);
       if (!game) {
@@ -165,13 +165,13 @@ export const setupSocket = (io: Server) => {
       });
 
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
-      //console.log('block placed', { gameId, row, col });
+      console.log('block placed', { gameId, row, col });
     });
 
     // Handle rematch request
     socket.on('rematch', (data: { gameId: string }) => {
       const { gameId } = data;
-      //console.log('rematch requested', { gameId });
+      console.log('rematch requested', { gameId });
 
       const game = getGame(gameId);
       if (!game) {
@@ -214,32 +214,32 @@ export const setupSocket = (io: Server) => {
       });
 
       io.to(`game-${gameId}`).emit('rematch', newGame);
-      //console.log('rematch game created', { newGameId });
+      console.log('rematch game created', { newGameId });
     });
     });
     // Handle leaving a game room
     socket.on('leave-game', (gameId: string) => {
       socket.leave(`game-${gameId}`);
-      //console.log(`Client ${socket.id} left game ${gameId}`);
+      console.log(`Client ${socket.id} left game ${gameId}`);
     });
 
     // Handle direct WebSocket messages (for native WebSocket compatibility)
     socket.on('message', (data) => {
       try {
         const message = typeof data === 'string' ? JSON.parse(data) : data;
-        //console.log('raw message received', message);
+        console.log('raw message received', message);
         
         if (message.type === 'join-game') {
           // Handle join-game message
           socket.join(`game-${message.gameId}`);
-          //console.log(`Client ${socket.id} joined game ${message.gameId}`);
+          console.log(`Client ${socket.id} joined game ${message.gameId}`);
           
           // Send current game state to the client
           const game = getGame(message.gameId);
           if (game) {
             socket.emit('game-state', game);
             socket.to(`game-${message.gameId}`).emit('game-updated', game);
-            //console.log('broadcasted game-updated after join', {
+            console.log('broadcasted game-updated after join', {
               gameId: message.gameId,
               players: game.players.map(p => p.id),
             });
@@ -317,7 +317,7 @@ export const setupSocket = (io: Server) => {
 
           // Broadcast the updated game state to all players in the game
           io.to(`game-${gameId}`).emit('game-updated', updatedGame);
-          //console.log('game state updated', { gameId, winner, isDraw });
+          console.log('game state updated', { gameId, winner, isDraw });
         } else if (message.type === 'place-block') {
           const { gameId, playerId, row, col } = message;
 
@@ -362,7 +362,7 @@ export const setupSocket = (io: Server) => {
           updateGame(gameId, updatedGame);
 
           io.to(`game-${gameId}`).emit('game-updated', updatedGame);
-          //console.log('block placed', { gameId, row, col });
+          console.log('block placed', { gameId, row, col });
         } else if (message.type === 'rematch') {
           const { gameId } = message;
 
@@ -407,7 +407,7 @@ export const setupSocket = (io: Server) => {
           });
 
           io.to(`game-${gameId}`).emit('rematch', newGame);
-          //console.log('rematch game created', { newGameId });
+          console.log('rematch game created', { newGameId });
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
@@ -416,7 +416,7 @@ export const setupSocket = (io: Server) => {
 
     // Handle disconnect
     socket.on('disconnect', () => {
-      //console.log('Client disconnected:', socket.id);
+      console.log('Client disconnected:', socket.id);
     });
 
     // Send welcome message

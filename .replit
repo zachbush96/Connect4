@@ -1,3 +1,14 @@
+# Install dependencies whenever the repl boots
+onBoot = "npm install"
+
+# Run the build step before serving
+compile = "npm run build"
+
+# Start the built Next.js server
+run = "npm run start"
+modules = ["nodejs-24"]
+
+# Expose Next.js’s default port (3000) to the web
 [[ports]]
-localPort = 3001
+localPort = 3000
 externalPort = 80
