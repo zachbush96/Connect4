@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import { getGame, updateGame } from '@/lib/game-store';
 import { BLOCKED_CELL } from '@/lib/constants';
+import { addWin } from '@/lib/scoreboard-store';
 
 export const setupSocket = (io: Server) => {
   io.on('connection', (socket) => {
@@ -80,6 +81,11 @@ export const setupSocket = (io: Server) => {
       };
 
       updateGame(gameId, updatedGame);
+
+      if (winner) {
+        const winnerName = game.players.find((p: any) => p.id === winner)?.name ?? 'Unknown';
+        addWin(winnerName);
+      }
 
       // Broadcast the updated game state to all players in the game
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
@@ -220,6 +226,11 @@ export const setupSocket = (io: Server) => {
           };
 
           updateGame(gameId, updatedGame);
+
+          if (winner) {
+            const winnerName = game.players.find((p: any) => p.id === winner)?.name ?? 'Unknown';
+            addWin(winnerName);
+          }
 
           // Broadcast the updated game state to all players in the game
           io.to(`game-${gameId}`).emit('game-updated', updatedGame);

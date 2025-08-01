@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGame, updateGame } from '@/lib/game-store'
 import { BLOCKED_CELL } from '@/lib/constants'
+import { addWin } from '@/lib/scoreboard-store'
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,6 +75,11 @@ export async function POST(request: NextRequest) {
     }
 
     updateGame(gameId, updatedGame)
+
+    if (winner) {
+      const winnerName = game.players.find((p: any) => p.id === winner)?.name ?? 'Unknown'
+      addWin(winnerName)
+    }
 
     console.log('[POST /api/game/move] move processed', { gameId, row, col, winner, isDraw })
 
