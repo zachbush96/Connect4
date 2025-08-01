@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import { getGame, updateGame } from '@/lib/game-store';
 import { BLOCKED_CELL } from '@/lib/constants';
 import { addWin } from '@/lib/scoreboard-store';
+import { addGameEvent } from '@/lib/game-log-store';
 
 export const setupSocket = (io: Server) => {
   io.on('connection', (socket) => {
@@ -82,6 +83,17 @@ export const setupSocket = (io: Server) => {
 
       updateGame(gameId, updatedGame);
 
+      addGameEvent({
+        type: 'move',
+        gameId,
+        playerId,
+        playerName: game.players.find((p: any) => p.id === playerId)?.name,
+        playerColor: game.players.find((p: any) => p.id === playerId)?.color,
+        row,
+        col,
+        timestamp: new Date().toISOString(),
+      });
+
       if (winner) {
         const winnerName = game.players.find((p: any) => p.id === winner)?.name ?? 'Unknown';
         addWin(winnerName);
@@ -140,6 +152,17 @@ export const setupSocket = (io: Server) => {
       };
 
       updateGame(gameId, updatedGame);
+
+      addGameEvent({
+        type: 'block',
+        gameId,
+        playerId,
+        playerName: game.players.find((p: any) => p.id === playerId)?.name,
+        playerColor: game.players.find((p: any) => p.id === playerId)?.color,
+        row,
+        col,
+        timestamp: new Date().toISOString(),
+      });
 
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
       console.log('block placed', { gameId, row, col });
@@ -226,6 +249,17 @@ export const setupSocket = (io: Server) => {
           };
 
           updateGame(gameId, updatedGame);
+
+          addGameEvent({
+            type: 'move',
+            gameId,
+            playerId,
+            playerName: game.players.find((p: any) => p.id === playerId)?.name,
+            playerColor: game.players.find((p: any) => p.id === playerId)?.color,
+            row,
+            col,
+            timestamp: new Date().toISOString(),
+          });
 
           if (winner) {
             const winnerName = game.players.find((p: any) => p.id === winner)?.name ?? 'Unknown';
