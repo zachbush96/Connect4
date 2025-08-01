@@ -14,6 +14,7 @@ import { Copy, Share2, Users, Settings } from 'lucide-react'
 import { BLOCKED_CELL } from '@/lib/constants'
 import { Scoreboard } from '@/components/Scoreboard'
 import { History } from '@/components/History'
+import { Chat } from '@/components/Chat'
 
 interface Player {
   id: string
@@ -669,7 +670,12 @@ export default function Connect4() {
           </div>
         </CardContent>
       </Card>
-      <History className="order-last md:order-last md:h-[75vh]" />
+      <Chat
+        socket={socket}
+        gameId={gameState.gameId}
+        playerId={myPlayerId}
+        className="order-last md:order-last md:h-[75vh]"
+      />
     </div>
   )
 }

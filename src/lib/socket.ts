@@ -24,8 +24,33 @@ export const setupSocket = (io: Server) => {
           players: game.players.map(p => p.id),
         });
       }
-    
+
     });
+
+    socket.on('chat-message', (data: { gameId: string; playerId: string; text: string }) => {
+      const { gameId, playerId, text } = data
+      const game = getGame(gameId)
+      if (!game) {
+        socket.emit('error', { message: 'Game not found' })
+        return
+      }
+      const player = game.players.find((p: any) => p.id === playerId)
+      const timestamp = new Date().toISOString()
+      addGameEvent({
+        type: 'chat',
+        gameId,
+        playerId,
+        playerName: player?.name,
+        playerColor: player?.color,
+        message: text,
+        timestamp,
+      })
+      io.to(`game-${gameId}`).emit('chat-message', {
+        senderName: player?.name || 'Unknown',
+        text,
+        timestamp,
+      })
+    })
 
     // Handle making a move
     socket.on('make-move', (data: { gameId: string; playerId: string; row: number; col: number }) => {

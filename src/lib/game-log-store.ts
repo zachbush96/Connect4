@@ -2,11 +2,12 @@ import fs from 'fs'
 import path from 'path'
 
 export interface GameEvent {
-  type: 'game-created' | 'player-joined' | 'move' | 'block'
+  type: 'game-created' | 'player-joined' | 'move' | 'block' | 'chat'
   gameId: string
   playerId?: string
   playerName?: string
   playerColor?: string
+  message?: string
   row?: number
   col?: number
   boardSize?: number
@@ -51,4 +52,21 @@ if (!globalForLog.gameLog) {
 export function addGameEvent(event: GameEvent) {
   gameLog.push(event)
   saveLogToFile(gameLog)
+}
+
+export interface ChatMessage {
+  senderName: string
+  text: string
+  timestamp: string
+}
+
+export function getChatMessages(gameId: string): ChatMessage[] {
+  const events = loadLogFromFile()
+  return events
+    .filter(ev => ev.type === 'chat' && ev.gameId === gameId && ev.message)
+    .map(ev => ({
+      senderName: ev.playerName || 'Unknown',
+      text: ev.message as string,
+      timestamp: ev.timestamp,
+    }))
 }
