@@ -17,19 +17,25 @@ interface GameSummary {
 export function History({ className }: { className?: string }) {
   const [games, setGames] = useState<GameSummary[]>([])
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch('/api/history')
-        const data = await res.json()
-        if (data.success) {
-          setGames(data.games as GameSummary[])
-        }
-      } catch (err) {
-        console.error('fetch history error', err)
+  // fetch function defined outside useEffect so we can call it on mount AND on an interval
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch('/api/history')
+      const data = await res.json()
+      if (data.success) {
+        setGames(data.games as GameSummary[])
       }
+    } catch (err) {
+      console.error('fetch history error', err)
     }
+  }
+
+  useEffect(() => {
+    // initial load
     fetchHistory()
+    // refresh every 60 seconds to match the scoreboard
+    const interval = setInterval(fetchHistory, 60000)
+    return () => clearInterval(interval)
   }, [])
 
   return (
