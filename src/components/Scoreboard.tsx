@@ -26,7 +26,7 @@ export function Scoreboard({ className }: { className?: string }) {
 
   useEffect(() => {
     fetchScores()
-    const interval = setInterval(fetchScores, 5000)
+    const interval = setInterval(fetchScores, 60000)
     return () => clearInterval(interval)
   }, [])
 
