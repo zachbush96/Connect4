@@ -1,25 +1,85 @@
 {
   "pages": {
-    "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
+    "/_not-found/page": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/_not-found/page-7b137d85f9de4771.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+    "/layout": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/css/cb23139ef36e94ad.css",
+      "static/chunks/798-e47c12279b7a7cf4.js",
+      "static/chunks/app/layout-3693a5fafbf42de2.js"
+    ],
+    "/api/game/block/route": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/api/game/block/route-89e88d2f8021605d.js"
     ],
     "/api/game/create/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/game/create/route.js"
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/api/game/create/route-125f0bb88635450c.js"
+    ],
+    "/api/game/details/route": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/api/game/details/route-d35ef9a053f68389.js"
     ],
     "/api/game/join/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/game/join/route.js"
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/api/game/join/route-067529f1c551e84d.js"
+    ],
+    "/api/game/move/route": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/api/game/move/route-760033de6f8cd341.js"
+    ],
+    "/api/game/rematch/route": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/api/game/rematch/route-f8fe7d4ed7dbc2e2.js"
+    ],
+    "/api/health/route": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/api/health/route-67555ba4cda66780.js"
+    ],
+    "/api/scoreboard/route": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/app/api/scoreboard/route-5b52ef5973b9631b.js"
+    ],
+    "/page": [
+      "static/chunks/webpack-14ffe8e936842fe9.js",
+      "static/chunks/4bd1b696-4ad49f259c53d116.js",
+      "static/chunks/684-2dc6131032f69409.js",
+      "static/chunks/main-app-2a8033fdf0f397f4.js",
+      "static/chunks/798-e47c12279b7a7cf4.js",
+      "static/chunks/690-3f51324a94b83c97.js",
+      "static/chunks/app/page-c759d18302bea67b.js"
     ]
   }
 }

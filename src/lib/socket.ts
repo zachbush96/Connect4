@@ -30,7 +30,7 @@ export const setupSocket = (io: Server) => {
     // Handle making a move
     socket.on('make-move', (data: { gameId: string; playerId: string; row: number; col: number }) => {
       const { gameId, playerId, row, col } = data;
-      console.log('make-move received', { gameId, playerId, row, col });
+      //console.log('make-move received', { gameId, playerId, row, col });
       
       // Get the current game state
       const game = getGame(gameId);
@@ -101,17 +101,17 @@ export const setupSocket = (io: Server) => {
 
       // Broadcast the updated game state to all players in the game
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
-    console.log('game state updated', {
-      gameId,
-      winner,
-      isDraw,
-      players: updatedGame.players.map(p => p.id),
-      });
+    // console.log('game state updated', {
+    //   gameId,
+    //   winner,
+    //   isDraw,
+    //   players: updatedGame.players.map(p => p.id),
+    //   });
 
     // Handle placing a block
     socket.on('place-block', (data: { gameId: string; playerId: string; row: number; col: number }) => {
       const { gameId, playerId, row, col } = data;
-      console.log('place-block received', { gameId, playerId, row, col });
+      // console.log('place-block received', { gameId, playerId, row, col });
 
       const game = getGame(gameId);
       if (!game) {
@@ -165,7 +165,7 @@ export const setupSocket = (io: Server) => {
       });
 
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
-      console.log('block placed', { gameId, row, col });
+      //console.log('block placed', { gameId, row, col });
     });
 
     // Handle rematch request
@@ -362,7 +362,7 @@ export const setupSocket = (io: Server) => {
           updateGame(gameId, updatedGame);
 
           io.to(`game-${gameId}`).emit('game-updated', updatedGame);
-          console.log('block placed', { gameId, row, col });
+          //console.log('block placed', { gameId, row, col });
         } else if (message.type === 'rematch') {
           const { gameId } = message;
 
