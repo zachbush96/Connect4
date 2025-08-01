@@ -554,7 +554,7 @@ export default function Connect4() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-center">
               <Button
                 variant="outline"
                 size="sm"
@@ -619,13 +619,13 @@ export default function Connect4() {
 
             {/* Game Board */}
             <div className="flex justify-center">
-              <div className="inline-block bg-blue-500 p-4 rounded-lg">
+              <div className="inline-block bg-blue-500 p-2 sm:p-3 md:p-4 rounded-lg">
                 {gameState.board.map((row, rowIndex) => (
                   <div key={rowIndex} className="flex">
                     {row.map((cell, colIndex) => (
                       <button
                         key={colIndex}
-                        className="w-12 h-12 bg-white border-2 border-gray-300 rounded-full m-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white border-2 border-gray-300 rounded-full m-1 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => isBlocking ? placeBlock(rowIndex, colIndex) : makeMove(colIndex)}
                         disabled={
                           isBlocking
@@ -638,7 +638,7 @@ export default function Connect4() {
                         ) : (
                           cell && (
                             <div
-                              className="w-10 h-10 rounded-full"
+                              className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full"
                               style={{ backgroundColor: getPlayerColor(cell) }}
                             />
                           )
