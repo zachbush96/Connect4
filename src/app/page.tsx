@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast'
 import { Copy, Share2, Users, Settings } from 'lucide-react'
 import { BLOCKED_CELL } from '@/lib/constants'
+import { Scoreboard } from '@/components/Scoreboard'
 
 interface Player {
   id: string
@@ -406,7 +407,8 @@ export default function Connect4() {
 
   if (isConfiguring) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-8 p-4">
+      <div className="flex flex-col md:flex-row items-center justify-center min-h-screen gap-8 p-4">
+        <Scoreboard className="order-last md:order-first" />
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -508,7 +510,8 @@ export default function Connect4() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-8 p-4">
+    <div className="flex flex-col md:flex-row items-center justify-center min-h-screen gap-8 p-4">
+      <Scoreboard className="order-last md:order-first" />
       <Card className="w-full max-w-4xl">
         <CardHeader>
           <div className="flex items-center justify-between">
