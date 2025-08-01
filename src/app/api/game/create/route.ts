@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { games } from '@/lib/game-store'
+import { addGameEvent } from '@/lib/game-log-store'
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,6 +45,16 @@ export async function POST(request: NextRequest) {
     }
 
     games.set(gameId, game)
+
+    addGameEvent({
+      type: 'game-created',
+      gameId,
+      playerId,
+      playerName,
+      playerColor,
+      boardSize,
+      timestamp: new Date().toISOString(),
+    })
 
     console.log('[POST /api/game/create] game created', { gameId })
 

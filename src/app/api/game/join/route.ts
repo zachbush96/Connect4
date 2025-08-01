@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGame, updateGame } from '@/lib/game-store'
+import { addGameEvent } from '@/lib/game-log-store'
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,6 +67,15 @@ export async function POST(request: NextRequest) {
     }
 
     updateGame(gameId, updatedGame)
+
+    addGameEvent({
+      type: 'player-joined',
+      gameId,
+      playerId,
+      playerName,
+      playerColor,
+      timestamp: new Date().toISOString(),
+    })
 
     console.log('[POST /api/game/join] player joined', {
       gameId,
