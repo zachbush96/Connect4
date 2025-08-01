@@ -167,6 +167,55 @@ export const setupSocket = (io: Server) => {
       io.to(`game-${gameId}`).emit('game-updated', updatedGame);
       console.log('block placed', { gameId, row, col });
     });
+
+    // Handle rematch request
+    socket.on('rematch', (data: { gameId: string }) => {
+      const { gameId } = data;
+      console.log('rematch requested', { gameId });
+
+      const game = getGame(gameId);
+      if (!game) {
+        socket.emit('error', { message: 'Game not found' });
+        return;
+      }
+
+      const newGameId = Math.random().toString(36).substr(2, 9);
+      const board = Array(game.boardSize)
+        .fill(null)
+        .map(() => Array(game.boardSize).fill(''));
+      const blocksUsed: Record<string, boolean> = {};
+      game.players.forEach(p => {
+        blocksUsed[p.id] = false;
+      });
+
+      const newGame = {
+        id: newGameId,
+        board,
+        currentPlayer: game.players[0].id,
+        players: game.players,
+        winner: null,
+        isDraw: false,
+        blocksUsed,
+        boardSize: game.boardSize,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      games.set(newGameId, newGame);
+
+      addGameEvent({
+        type: 'game-created',
+        gameId: newGameId,
+        playerId: newGame.currentPlayer,
+        playerName: game.players[0].name,
+        playerColor: game.players[0].color,
+        boardSize: newGame.boardSize,
+        timestamp: new Date().toISOString(),
+      });
+
+      io.to(`game-${gameId}`).emit('rematch', newGame);
+      console.log('rematch game created', { newGameId });
+    });
     });
     // Handle leaving a game room
     socket.on('leave-game', (gameId: string) => {
@@ -314,6 +363,51 @@ export const setupSocket = (io: Server) => {
 
           io.to(`game-${gameId}`).emit('game-updated', updatedGame);
           console.log('block placed', { gameId, row, col });
+        } else if (message.type === 'rematch') {
+          const { gameId } = message;
+
+          const game = getGame(gameId);
+          if (!game) {
+            socket.emit('error', { message: 'Game not found' });
+            return;
+          }
+
+          const newGameId = Math.random().toString(36).substr(2, 9);
+          const board = Array(game.boardSize)
+            .fill(null)
+            .map(() => Array(game.boardSize).fill(''));
+          const blocksUsed: Record<string, boolean> = {};
+          game.players.forEach(p => {
+            blocksUsed[p.id] = false;
+          });
+
+          const newGame = {
+            id: newGameId,
+            board,
+            currentPlayer: game.players[0].id,
+            players: game.players,
+            winner: null,
+            isDraw: false,
+            blocksUsed,
+            boardSize: game.boardSize,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          games.set(newGameId, newGame);
+
+          addGameEvent({
+            type: 'game-created',
+            gameId: newGameId,
+            playerId: newGame.currentPlayer,
+            playerName: game.players[0].name,
+            playerColor: game.players[0].color,
+            boardSize: newGame.boardSize,
+            timestamp: new Date().toISOString(),
+          });
+
+          io.to(`game-${gameId}`).emit('rematch', newGame);
+          console.log('rematch game created', { newGameId });
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);

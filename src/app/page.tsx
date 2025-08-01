@@ -129,8 +129,26 @@ export default function Connect4() {
         }))
       }
 
+      const handleRematch = (data: any) => {
+        setGameState({
+          board: data.board,
+          currentPlayer: data.currentPlayer,
+          players: data.players,
+          winner: data.winner,
+          isDraw: data.isDraw,
+          blocksUsed: data.blocksUsed,
+          boardSize: data.boardSize,
+          gameId: data.id,
+        })
+        socketInstance.emit('join-game', data.id)
+        const url = new URL(window.location.href)
+        url.searchParams.set('game', data.id)
+        window.history.pushState({}, '', url)
+      }
+
       socketInstance.on('game-state', handleGameUpdate)
       socketInstance.on('game-updated', handleGameUpdate)
+      socketInstance.on('rematch', handleRematch)
 
       socketInstance.on('error', (err: any) => {
         toast({
@@ -371,6 +389,12 @@ export default function Connect4() {
       title: "Link Copied!",
       description: "Share this link with your friend",
     })
+  }
+
+  const requestRematch = () => {
+    if (!socket || !gameState.gameId) return
+    console.log('requesting rematch')
+    ;(socket as Socket).emit('rematch', { gameId: gameState.gameId })
   }
 
   const resetGame = () => {
@@ -632,7 +656,7 @@ export default function Connect4() {
                       ? `${getPlayerName(gameState.winner)} wins!`
                       : "It's a draw!"}
                   </p>
-                  <Button onClick={resetGame}>Play Again</Button>
+                  <Button onClick={requestRematch}>Rematch</Button>
                 </div>
               ) : (
                 <p className="text-lg">
