@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Copy, Share2, Users, Settings } from 'lucide-react'
 import { BLOCKED_CELL } from '@/lib/constants'
 import { Scoreboard } from '@/components/Scoreboard'
+import { History } from '@/components/History'
 
 interface Player {
   id: string
@@ -529,6 +530,7 @@ export default function Connect4() {
             </div>
           </CardContent>
         </Card>
+        <History className="order-last md:order-last md:h-[75vh]" />
       </div>
     )
   }
@@ -667,6 +669,7 @@ export default function Connect4() {
           </div>
         </CardContent>
       </Card>
+      <History className="order-last md:order-last md:h-[75vh]" />
     </div>
   )
 }
